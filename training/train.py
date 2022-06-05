@@ -11,7 +11,7 @@ import datasets.registry
 from foundations import hparams
 from foundations import paths
 from foundations.step import Step
-from models.base import Model, DataParallel, DistributedDataParallel
+from models.base import Model, DataParallel #DistributedDataParallel
 import models.registry
 from platforms.platform import get_platform
 from training.checkpointing import restore_checkpoint
@@ -72,7 +72,8 @@ def train(
 
     # Handle parallelism if applicable.
     if get_platform().is_distributed:
-        model = DistributedDataParallel(model, device_ids=[get_platform().rank])
+        pass
+        #model = DistributedDataParallel(model, device_ids=[get_platform().rank])
     elif get_platform().is_parallel:
         model = DataParallel(model)
 

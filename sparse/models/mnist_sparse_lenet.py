@@ -2,29 +2,30 @@ import torch.nn as nn
 import torch.nn.functional as F
 import networkx as nx
 from networkx.algorithms import bipartite
+from sparse.graph_generators import registry
 
 from foundations import hparams
 from lottery.desc import LotteryDesc
-from models import base
+from sparse.models import base
 from pruning import sparse_global
-from models import sparse_linear as sl
+from sparse.models import sparse_linear as sl
 
 class Model(base.Model):
     '''A LeNet sparsely-connected model for CIFAR-10'''
 
-    def __init__(self, plan, initializer, outputs=10):
+    def __init__(self, plan, generator, density, initializer, outputs=10):
         super(Model, self).__init__()
 
         layers = []
         current_size = 784  # 28 * 28 = number of pixels in MNIST image.
         for size in plan:
-            G = bipartite.random_graph(current_size, size, 0.3)
+            G = generator(current_size, size, density)
             mask = bipartite.biadjacency_matrix(G, row_order=list(range(current_size))).toarray()
             layers.append(sl.SparseLinear(current_size, size, mask))
             current_size = size
 
         self.fc_layers = nn.ModuleList(layers)
-        G = bipartite.random_graph(current_size, outputs, 0.3)
+        G = generator(current_size, outputs, 0.3)
         mask = bipartite.biadjacency_matrix(G, row_order=list(range(current_size))).toarray()
         self.fc = sl.SparseLinear(current_size, outputs, mask)
         self.criterion = nn.CrossEntropyLoss()
@@ -49,7 +50,7 @@ class Model(base.Model):
                 all([x.isdigit() and int(x) > 0 for x in model_name.split('_')[3:]]))
 
     @staticmethod
-    def get_model_from_name(model_name, initializer, outputs=None):
+    def get_model_from_name(model_name, initializer, density, gen_name, outputs=None):
         """The name of a model is mnist_lenet_N1[_N2...].
 
         N1, N2, etc. are the number of neurons in each fully-connected layer excluding the
@@ -63,7 +64,8 @@ class Model(base.Model):
             raise ValueError('Invalid model name: {}'.format(model_name))
 
         plan = [int(n) for n in model_name.split('_')[3:]]
-        return Model(plan, initializer, outputs)
+        generator = registry.get(gen_name)
+        return Model(plan, generator, density, initializer, outputs)
 
     @property
     def loss_criterion(self):
@@ -85,7 +87,12 @@ class Model(base.Model):
         training_hparams = hparams.TrainingHparams(
             optimizer_name='sgd',
             lr=0.1,
-            training_steps='40ep',
+            training_steps='40ep'
+        )
+
+        sparse_hparams = hparams.SparseHparams(
+            density=0.3,
+            graph_generator='Erdos'
         )
 
         pruning_hparams = sparse_global.PruningHparams(
@@ -94,4 +101,4 @@ class Model(base.Model):
             pruning_layers_to_ignore='fc.weight',
         )
 
-        return LotteryDesc(model_hparams, dataset_hparams, training_hparams, pruning_hparams)
+        return LotteryDesc(model_hparams, dataset_hparams, training_hparams, pruning_hparams, sparse_hparams)

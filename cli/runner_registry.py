@@ -7,8 +7,9 @@ from foundations.runner import Runner
 from lottery.branch.runner import BranchRunner
 from lottery.runner import LotteryRunner
 from training.runner import TrainingRunner
+from sparse.runner import SparseRunner
 
-registered_runners = {'train': TrainingRunner, 'lottery': LotteryRunner, 'lottery_branch': BranchRunner}
+registered_runners = {'train': TrainingRunner, 'lottery': LotteryRunner, 'lottery_branch': BranchRunner, 'sparse': SparseRunner}
 
 
 def get(runner_name: str) -> Runner:

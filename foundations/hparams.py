@@ -185,3 +185,13 @@ class PruningHparams(Hparams):
     _description: str = 'Hyperparameters that determine how the model is pruned. ' \
                         'More hyperparameters will appear once the pruning strategy is selected.'
     _pruning_strategy: str = 'The pruning strategy to use.'
+
+@dataclass
+class SparseHparams(Hparams):
+    density: float
+    graph_generator: str
+
+    _name: str = 'Random Sparse Network Hyperparameters'
+    _description: str = 'Hyperparameters that determine how the random sparse network is defined.'
+    _density: str = 'Network connection density.'
+    _graph_generator: str = 'Graph generation model.'

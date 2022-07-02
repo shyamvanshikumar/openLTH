@@ -12,7 +12,6 @@ from foundations.step import Step
 import lottery.desc
 from platforms.platform import get_platform
 
-
 class Model(abc.ABC, torch.nn.Module):
     """The base class used by all models in this codebase."""
 

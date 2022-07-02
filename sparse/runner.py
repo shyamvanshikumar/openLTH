@@ -8,6 +8,7 @@ import sparse.models.registry
 from platforms.platform import get_platform
 from training import train
 from sparse.desc import SparseDesc
+from sparse.metric_logger import GraphMetricLogger
 
 @dataclass
 class SparseRunner(Runner):
@@ -44,6 +45,11 @@ class SparseRunner(Runner):
             print(self.desc.display)
             print(f'Output Location: {self.desc.run_path(self.replicate)}' + '\n' + '='*82 + '\n')
         self.desc.save(self.desc.run_path(self.replicate))
+        model = sparse.models.registry.get(self.desc.model_hparams, self.desc.sparse_hparams, self.desc.run_path(self.replicate))
         train.standard_train(
-            sparse.models.registry.get(self.desc.model_hparams, self.desc.sparse_hparams), self.desc.run_path(self.replicate),
-            self.desc.dataset_hparams, self.desc.training_hparams, evaluate_every_epoch=self.evaluate_every_epoch)
+            model, self.desc.run_path(self.replicate), self.desc.dataset_hparams, 
+            self.desc.training_hparams, evaluate_every_epoch=self.evaluate_every_epoch)
+        
+        logger = GraphMetricLogger(self.desc.run_path(self.replicate))
+        logger.eval_graph_metrics(model)
+        logger.save()

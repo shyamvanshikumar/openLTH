@@ -188,10 +188,11 @@ class PruningHparams(Hparams):
 
 @dataclass
 class SparseHparams(Hparams):
-    density: float
+    density: str
     graph_generator: str
 
     _name: str = 'Random Sparse Network Hyperparameters'
     _description: str = 'Hyperparameters that determine how the random sparse network is defined.'
-    _density: str = 'Network connection density.'
+    _density: str = 'Network connection density of each layer of the architecture written as comma-seperated.' \
+                    'The number of entries must match the number of trainable layers'
     _graph_generator: str = 'Graph generation model.'

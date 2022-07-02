@@ -12,6 +12,9 @@ def checkpoint(root): return os.path.join(root, 'checkpoint.pth')
 def logger(root): return os.path.join(root, 'logger')
 
 
+def metricLogger(root): return os.path.join(root, 'metric_logger.json')
+
+
 def mask(root): return os.path.join(root, 'mask.pth')
 
 

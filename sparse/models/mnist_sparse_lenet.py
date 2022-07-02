@@ -10,6 +10,7 @@ from sparse.models import base
 from pruning import sparse_global
 from sparse.models import sparse_linear as sl
 
+
 class Model(base.Model):
     '''A LeNet sparsely-connected model for CIFAR-10'''
 
@@ -18,14 +19,14 @@ class Model(base.Model):
 
         layers = []
         current_size = 784  # 28 * 28 = number of pixels in MNIST image.
-        for size in plan:
-            G = generator(current_size, size, density)
+        for i, size in enumerate(plan):
+            G = generator(current_size, size, density[i])
             mask = bipartite.biadjacency_matrix(G, row_order=list(range(current_size))).toarray()
             layers.append(sl.SparseLinear(current_size, size, mask))
             current_size = size
 
         self.fc_layers = nn.ModuleList(layers)
-        G = generator(current_size, outputs, 0.3)
+        G = generator(current_size, outputs, density[-1])
         mask = bipartite.biadjacency_matrix(G, row_order=list(range(current_size))).toarray()
         self.fc = sl.SparseLinear(current_size, outputs, mask)
         self.criterion = nn.CrossEntropyLoss()
@@ -65,6 +66,10 @@ class Model(base.Model):
 
         plan = [int(n) for n in model_name.split('_')[3:]]
         generator = registry.get(gen_name)
+
+        density = [float(d) for d in density.split(',')]
+        if(len(density) != len(plan)+1):
+            raise ValueError('Number of density values is not compatible with number of trainable layers')
         return Model(plan, generator, density, initializer, outputs)
 
     @property

@@ -26,7 +26,7 @@ class LotteryDesc(Desc):
     dataset_hparams: hparams.DatasetHparams
     training_hparams: hparams.TrainingHparams
     pruning_hparams: hparams.PruningHparams
-    sparse_hparams: hparams.SparseHparams
+    sparse_hparams: hparams.SparseHparams = None
     pretrain_dataset_hparams: hparams.DatasetHparams = None
     pretrain_training_hparams: hparams.TrainingHparams = None
 

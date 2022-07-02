@@ -15,7 +15,7 @@ from platforms.platform import get_platform
 registered_models = [mnist_sparse_lenet.Model]
 
 
-def get(model_hparams: ModelHparams, sparse_hparams: SparseHparams, outputs=None):
+def get(model_hparams: ModelHparams, sparse_hparams: SparseHparams, location: str, outputs=None):
     """Get the model for the corresponding hyperparameters."""
 
     # Select the initializer.
@@ -44,6 +44,7 @@ def get(model_hparams: ModelHparams, sparse_hparams: SparseHparams, outputs=None
 
     if model is None:
         raise ValueError('No such model: {}'.format(model_hparams.model_name))
+
 
     # Freeze various subsets of the network.
     bn_names = []
